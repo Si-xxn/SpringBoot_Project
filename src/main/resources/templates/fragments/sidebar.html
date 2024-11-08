@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}">
+
+<th:block th:fragment="sidebarFragment">
+
+  <div class="left-side">
+    <ul class="list-group">
+        <li> <a href="/members/myPage">프로필</a> </li>
+      <li> <a href="/members/update">정보수정</a> </li>
+      <li> <a href="#">장바구니</a> </li>
+      <li> <a href="#">위시리스트</a> </li>
+      <li> <a href="#">구매이력</a> </li>
+      <li> <a href="/members/changePassword">비밀번호 변경</a> </li>
+      <li> <a href="#">회원 탈퇴</a> </li>
+    </ul>
+  </div>
+
+</th:block>
+</html>
+
+
+

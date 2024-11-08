@@ -1,0 +1,107 @@
+buildscript {
+    ext {
+        queryDslVersion = "5.0.0"
+    }
+} // 쿼리dsl 버전 관리 (http://www.querydsl.com)
+// 쿼리dsl Qdomain 셍성 -> Gradle -> Tasks -> other -> complieJava
+// 쿼리dsl Qdomain 셍성 오류시 Gradle -> Tasks -> build -> Clean -> 셍성
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.11'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'          // 스프링 부트 버전에 맞춰 자동으로 JPA 관련 라이브러리 버전 관리
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'         // 프론트 담당
+    // https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-java8time - 날짜,시간 출력 포맷팅
+    implementation group: 'org.thymeleaf.extras', name: 'thymeleaf-extras-java8time', version: '3.0.4.RELEASE'
+    // 레이아웃 기능을 위한 라이브러리 xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" html 추가 필수
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.1.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'               // 스프링 웹
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'          // 스프링 어플리케이션 테스트 기능
+
+    compileOnly 'org.projectlombok:lombok'                                          // 객체 담당
+    annotationProcessor 'org.projectlombok:lombok'                                  // annotation lombok 세틩
+    testCompileOnly 'org.projectlombok:lombok'                                      // 테스트 환경 lombok
+    testAnnotationProcessor 'org.projectlombok:lombok'                              // 테스트 환경 annotation
+
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'                 // 부트 개발 필수 코드
+
+    // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client - 마리아 DB JDBC 드라이버
+    implementation group: 'org.mariadb.jdbc', name: 'mariadb-java-client', version: '3.4.1'
+    // runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'   // 마리아 DB JDBC 드라이버
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'                    // junit 테스트
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-validation - 폼으로 입력된 값이 유효한 값인지 검증하는 코드
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '3.2.4'
+
+    // 모델 처리를 위한 라이브러리 (DTO와 엔티티간의 변환 처리용) -> config.RootConfig에 적용
+    // 상품을 등록할 때 화면으로 부터 전달 받은 DTO 객체를 엔티티로 변환하는 작업 대체(DTOtoEntity, EntityToDTO)
+    // 서로다른 클래스의 값을 필드의 이름과 자료형이 같으면 getter, setter를 통해 값을 복사해서 객체로 변환 해줌)
+    implementation 'org.modelmapper:modelmapper:3.1.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'          // 스프링 시큐리티 시작용
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-test - 스프링 시큐리티 테스트
+    testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.2.4'
+    // 부트 3이상 부터는 6 사용 함 https://mvnrepository.com/artifact/org.thymeleaf.extras/thymeleaf-extras-springsecurity6
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6:3.1.1.RELEASE'
+
+    // https://mvnrepository.com/artifact/javax.mail/mail - mail 인증 관련
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
+    implementation 'javax.mail:mail:1.4.7'
+
+    // QueryDsl 설정
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+
+
+    annotationProcessor(
+            "jakarta.persistence:jakarta.persistence-api",
+            "jakarta.annotation:jakarta.annotation-api",
+            "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
+
+
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+
+
+}
+
+sourceSets {
+
+    // 톰켓 10용
+    main {
+        java {
+            srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+        }
+    }
+
+}
+
+
+compileJava.dependsOn('clean') // 톰켓 10용
