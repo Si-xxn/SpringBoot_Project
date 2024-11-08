@@ -33,12 +33,15 @@ public class MemberController {
 
     @GetMapping(value = "/new")
     public String memberForm(Model model){/* 회원 가입 페이지로 이동할 수 있도록 MemberController클래스에 메소드를 작성*/
+        log.info("MemberController - new(GET) --------------------------------------- ");
         model.addAttribute("memberDTO", new MemberDTO());
         return "member/sign_up";
     }
 
     @PostMapping(value = "/new") // 회원 가입 POST 메서드
+
     public String newMember(@Valid MemberDTO memberDTO, BindingResult bindingResult, Model model){
+        log.info("MemberController - new(POST) --------------------------------------- ");
         // spring-boot-starter-validation를 활용한 검증 bindingResult객체 추가
         if(bindingResult.hasErrors()){
             /*검증하려는 객체의 앞에 @Valid 어노테이션을 선언하고, 파라미터로 bindingResult 객체를 추가함.
@@ -97,10 +100,42 @@ public class MemberController {
         return "redirect:/members/myPage";
     }
 
-    @GetMapping("/changePassword")
+    @GetMapping(value = "/changePassword") // 비밀번호 변경 페이지
     public String showChangePasswordPage(Model model) {
+        log.info("MemberController - change(GET) --------------------------------------- ");
         model.addAttribute("updatePasswordDTO", new UpdatePasswordDTO());
         return "member/changePassword";
+    }
+
+    // 비밀번호 변경
+    @PostMapping(value = "/changePassword")
+    public String changePassword(@Valid @ModelAttribute UpdatePasswordDTO updatePasswordDTO, Model model) {
+        log.info("MemberController - changePassword(POST) --------------------------------------- ");
+        // 새 비밀번호와 새 비밀번호 확인 일치 여부 확인
+        if (!updatePasswordDTO.getNewPassword().equals(updatePasswordDTO.getNewPasswordChk())) {
+            model.addAttribute("error", "새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+            log.info("새 비밀번호: " + updatePasswordDTO.getNewPassword() + " | " + "비밀번호 확인: " + updatePasswordDTO.getNewPasswordChk());
+            return "member/changePassword";  // 비밀번호 변경 폼 페이지로 돌아가서 오류 메시지 표시
+        }
+
+        // 현재 비밀번호가 맞는지 확인
+        int isVerified = memberService.verifyCurrentPassword(updatePasswordDTO.getEmail(), updatePasswordDTO.getCurrentPassword());
+        log.info("isVerified : " + isVerified);
+        if (isVerified == 0) {
+            model.addAttribute("error", "현재 비밀번호가 일치하지 않습니다.");
+            return "member/changePassword";  // 비밀번호 변경 폼 페이지로 돌아가서 오류 메시지 표시
+        }
+
+        // 비밀번호 변경 수행
+        int isChanged = memberService.changePassword(updatePasswordDTO.getEmail(), updatePasswordDTO.getNewPassword());
+        log.info("isChanged : " + isChanged);
+        if (isChanged == 1) {
+            model.addAttribute("success", "비밀번호가 성공적으로 변경되었습니다.");
+            return "redirect:/profile";  // 성공 시 리디렉션할 경로 (예: 프로필 페이지)
+        } else {
+            model.addAttribute("error", "비밀번호 변경에 실패했습니다.");
+            return "member/changePassword";  // 비밀번호 변경 폼 페이지로 돌아가서 오류 메시지 표시
+        }
     }
 /*
     @ResponseBody
