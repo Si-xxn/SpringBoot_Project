@@ -74,6 +74,8 @@ public class Member extends BaseEntity /*implements UserDetails*/ {
         this.phoneNum = phoneNum;
     }
 
+    public void updatePassword(String password){ this.password = password; }
+
 
    /*
    // UserDetails 메서드 구현
